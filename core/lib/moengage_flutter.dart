@@ -30,6 +30,7 @@ class MoEngageFlutter {
   InAppCallbackHandler? _onInAppDismiss;
   InAppCallbackHandler? _onInAppCustomAction;
   InAppCallbackHandler? _onInAppSelfHandle;
+  static Function? onAction;
 
   MoEngageFlutter() {
     _moEAndroid = MoEAndroidCore(_channel);
@@ -57,6 +58,13 @@ class MoEngageFlutter {
     _onInAppDismiss = onInAppDismiss;
     _onInAppCustomAction = onInAppCustomAction;
     _onInAppSelfHandle = onInAppSelfHandle;
+    print(
+        'MOE ${_onInAppSelfHandle} ${_onInAppCustomAction} ${_onInAppDismiss} ${_onInAppShown}');
+  }
+
+  void setCustomActionHandler(InAppCallbackHandler customHandler) {
+    onAction = customHandler;
+    print('k 1 ${customHandler} ${count}');
   }
 
   void setUpPushTokenCallback(PushTokenCallbackHandler onPushTokenGenerated) {
@@ -65,6 +73,15 @@ class MoEngageFlutter {
 
   Future<dynamic> _handler(MethodCall call) async {
     print("Received callback in dart. Payload" + call.toString());
+    print(
+        'MOE ${call.method} ${_onInAppSelfHandle} ${_onInAppCustomAction} ${_onInAppDismiss} ${_onInAppShown}');
+    if (call.method == 'onInAppCustomAction') {
+      print('K 2 ${call.arguments} ${onAction} ${count}');
+      InAppCampaign? inAppCampaign = inAppCampaignFromJson(call.arguments);
+
+      onAction?.call(inAppCampaign);
+      print('K 3 ${call.arguments} ${onAction}');
+    }
     try {
       if (call.method == callbackPushTokenGenerated &&
           _onPushTokenGenerated != null) {
